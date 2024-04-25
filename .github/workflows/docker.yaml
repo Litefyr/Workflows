@@ -4,10 +4,10 @@ on:
   workflow_call:
     secrets:
       DOCKERHUB_USERNAME:
-        description: 'docker hub username'
+        description: 'Your Docker Hub username'
         required: false
       DOCKERHUB_TOKEN:
-        description: 'docker hub token'
+        description: 'Your token for Docker Hub'
         required: false
     inputs:
       artifact:
