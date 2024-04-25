@@ -1,0 +1,96 @@
+name: Build website
+
+on:
+  workflow_call:
+    secrets:
+      COMPOSER_AUTH_COMMAND:
+        required: false
+      COMPOSER_AUTH:
+        required: false
+    inputs:
+      upload:
+        required: false
+        description: Define which files should be uploaded
+        default: .docker .synco.yml bin Build DistributionPackages Data Packages Web Makefile composer.json composer.lock flow .postcssrc.mjs package.json pipeline.yaml pnpm-lock.yaml tailwind.litespeed.mjs tailwind.config.mjs
+        type: string
+
+jobs:
+  build:
+    env:
+      COMPOSER_AUTH_COMMAND: ${{secrets.COMPOSER_AUTH_COMMAND}}
+      COMPOSER_AUTH: ${{secrets.COMPOSER_AUTH}}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install jq
+        run: pip install jq
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get PHP version from composer.json
+        id: php_version
+        run: |
+          echo "output=$(jq -r '.require.php' < composer.json | grep -o -e '[0-9]\.[0-9]')" >> $GITHUB_OUTPUT
+
+      - name: Get package manager from package.json
+        id: package_manager
+        run: |
+          echo "output=$(jq -r '.scripts.pipeline' < package.json | awk '{print $1}')" >> $GITHUB_OUTPUT
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup node
+        uses: actions/setup-node@v4.0.2
+        with:
+          node-version-file: .nvmrc
+          cache: ${{ steps.package_manager.outputs.output }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ steps.php_version.outputs.output }}
+          tools: composer:v2
+          extensions: mbstring, intl
+
+      - name: Configure composer authentication
+        if: ${{ env.COMPOSER_AUTH_COMMAND }}
+        run: composer config --auth ${{ env.COMPOSER_AUTH_COMMAND }}
+
+      - name: Save auth.json
+        id: auth_json
+        if: ${{ env.COMPOSER_AUTH_COMMAND }}
+        run: echo "output=auth.json" >> $GITHUB_OUTPUT
+
+      - name: Get composer cache directory
+        id: composer-cache
+        run: |
+          echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Restore composer cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install packages with composer
+        run: composer install --no-interaction --no-ansi --optimize-autoloader --no-progress --prefer-dist --ignore-platform-reqs
+
+      - name: Build JS and CSS
+        run: ${{ steps.package_manager.outputs.output }} run pipeline
+
+      - name: Remove dev dependencies
+        run: composer install --no-interaction --no-ansi --optimize-autoloader --no-progress --prefer-dist --no-dev --ignore-platform-reqs
+
+        # We create a tar to preserve persmissions || true is used to prevent the build from failing if the tar command fails (because of missing files for example)
+      - name: Compress files
+        run: tar -cvf build.tar ${{ inputs.upload }} ${{ steps.auth_json.outputs.output }} || true
+
+      - name: Upload file
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: build.tar
+          retention-days: 1
+          overwrite: true
