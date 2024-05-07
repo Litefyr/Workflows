@@ -1,4 +1,4 @@
-# Workflows for [Litespeed] and [Neos]
+# Workflows for [Blazing] and [Neos]
 
 ## How to use it
 
@@ -22,7 +22,7 @@ as needed, and following the [spec from the config][composer config].
 #### Define which files should be uploaded
 
 With the variable `upload`, you can define which files and folders should be uploaded to the artifact. No worry, if you
-have one file missing, the action doesn't fail because of that. All you get is a warning in the console. As [Litespeed]
+have one file missing, the action doesn't fail because of that. All you get is a warning in the console. As [Blazing]
 is capable of updating your `CSS` as some markup changes, it uploads per default also the build stack from [Carbon.Pipeline]
 
 ### Docker workflow
@@ -39,9 +39,9 @@ There are several variables:
 | `platforms`  | Platforms for docker image               | `linux/amd64`               |
 | `dockerfile` | Dockerfile to use                        | `./.docker/neos/Dockerfile` |
 
-[litespeed]: https://litespeed.io
+[blazing]: https://blazing.at
 [neos]: https://neos.io
-[distribution]: https://github.com/LitespeedProject/Distribution
+[distribution]: https://github.com/BlazingRepos/Distribution
 [composer]: https://getcomposer.org
 [node dependencies]: https://www.npmjs.com
 [authentication]: https://getcomposer.org/doc/articles/authentication-for-private-packages.md
