@@ -9,7 +9,7 @@ on:
       upload:
         required: false
         description: Define which files should be uploaded
-        default: .docker .synco.yml bin Build DistributionPackages Data Packages Web Makefile composer.json composer.lock flow .postcssrc.mjs package.json pipeline.yaml pnpm-lock.yaml tailwind.blazing.mjs tailwind.config.mjs
+        default: .docker .synco.yml bin Build DistributionPackages Data Packages Web Makefile composer.json composer.lock flow .postcssrc.mjs package.json pipeline.yaml pnpm-lock.yaml tailwind.litefyr.mjs tailwind.config.mjs
         type: string
 
 jobs:
