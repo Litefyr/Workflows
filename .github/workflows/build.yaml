@@ -3,6 +3,8 @@ name: Build website
 on:
   workflow_call:
     secrets:
+      COMPOSER_AUTH_COMMAND:
+        required: false
       COMPOSER_AUTH:
         required: false
     inputs:
@@ -15,6 +17,7 @@ on:
 jobs:
   build:
     env:
+      COMPOSER_AUTH_COMMAND: ${{secrets.COMPOSER_AUTH_COMMAND}}
       COMPOSER_AUTH: ${{secrets.COMPOSER_AUTH}}
     runs-on: ubuntu-latest
     steps:
@@ -48,6 +51,15 @@ jobs:
           php-version: ${{ steps.php_version.outputs.output }}
           tools: composer:v2
           extensions: mbstring, intl
+
+      - name: Configure composer authentication
+        if: ${{ env.COMPOSER_AUTH_COMMAND }}
+        run: composer config --auth ${{ env.COMPOSER_AUTH_COMMAND }}
+
+      - name: Save auth.json
+        id: auth_json
+        if: ${{ env.COMPOSER_AUTH_COMMAND }}
+        run: echo "output=auth.json" >> $GITHUB_OUTPUT
 
       - name: Get composer cache directory
         id: composer-cache
