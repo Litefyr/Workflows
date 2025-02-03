@@ -16,7 +16,6 @@ jobs:
   build:
     env:
       COMPOSER_AUTH: ${{secrets.COMPOSER_AUTH}}
-      COREPACK_DEFAULT_TO_LATEST: 0
     runs-on: ubuntu-latest
     steps:
       - name: Install jq
@@ -33,6 +32,9 @@ jobs:
         id: package_manager
         run: |
           echo "output=$(jq -r '.scripts.pipeline' < package.json | awk '{print $1}')" >> $GITHUB_OUTPUT
+
+      - name: Use Latest Corepack
+        run: npm install -g corepack@latest
 
       - name: Enable Corepack
         run: corepack enable
