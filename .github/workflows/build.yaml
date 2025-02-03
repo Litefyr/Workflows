@@ -16,6 +16,7 @@ jobs:
   build:
     env:
       COMPOSER_AUTH: ${{secrets.COMPOSER_AUTH}}
+      COREPACK_DEFAULT_TO_LATEST: 0
     runs-on: ubuntu-latest
     steps:
       - name: Install jq
