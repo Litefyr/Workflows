@@ -63,7 +63,7 @@ jobs:
         if: ${{ inputs.artifact == '' }}
 
       - name: Download artifact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         if: ${{ inputs.artifact != '' }}
         with:
           name: ${{ inputs.artifact }}
